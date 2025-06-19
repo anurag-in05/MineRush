@@ -8,8 +8,7 @@ const MONGODB_URI = 'mongodb+srv://anurag2005iit:IJtlKBIsrHSVggjJ@cluster0.40k0j
 
 app.use(express.json());
 
-// --- Mongoose Schemas and Models ---
-
+// --- Mongoose Schemas and Models ---     
 const userSchema = new mongoose.Schema({
     username: { type: String, unique: true },
     password: String, // In production, hash this!
