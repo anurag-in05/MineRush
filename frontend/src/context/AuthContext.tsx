@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 
+const API_URL = 'http://localhost:3000';
+
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -19,52 +22,60 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
+  // Load user/token from localStorage on mount
   useEffect(() => {
+    const savedToken = localStorage.getItem('minesToken');
     const savedUser = localStorage.getItem('minesUser');
+    if (savedToken) setToken(savedToken);
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
+  // Save user/token to localStorage when they change
+  useEffect(() => {
+    if (token) localStorage.setItem('minesToken', token);
+    else localStorage.removeItem('minesToken');
+    if (user) localStorage.setItem('minesUser', JSON.stringify(user));
+    else localStorage.removeItem('minesUser');
+  }, [token, user]);
+
   const login = async (username: string, password: string): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const savedUsers = JSON.parse(localStorage.getItem('minesUsers') || '[]');
-    const existingUser = savedUsers.find((u: any) => u.username === username && u.password === password);
-    
-    if (existingUser) {
-      const userData = { id: existingUser.id, username: existingUser.username, balance: existingUser.balance };
-      setUser(userData);
-      localStorage.setItem('minesUser', JSON.stringify(userData));
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      setToken(data.token);
+      setUser({ id: data.id || '', username, balance: data.balance });
       return true;
+    } catch {
+      return false;
     }
-    return false;
   };
 
   const register = async (username: string, password: string): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const savedUsers = JSON.parse(localStorage.getItem('minesUsers') || '[]');
-    if (savedUsers.find((u: any) => u.username === username)) return false;
-    
-    const newUser = {
-      id: Date.now().toString(),
-      username,
-      password,
-      balance: 1000
-    };
-    
-    savedUsers.push(newUser);
-    localStorage.setItem('minesUsers', JSON.stringify(savedUsers));
-    
-    const userData = { id: newUser.id, username: newUser.username, balance: newUser.balance };
-    setUser(userData);
-    localStorage.setItem('minesUser', JSON.stringify(userData));
-    return true;
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) return false;
+      return await login(username, password);
+    } catch {
+      return false;
+    }
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('minesUser');
+    localStorage.removeItem('minesToken');
   };
 
   const updateBalance = (newBalance: number) => {
@@ -72,18 +83,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedUser = { ...user, balance: newBalance };
       setUser(updatedUser);
       localStorage.setItem('minesUser', JSON.stringify(updatedUser));
-      
-      const savedUsers = JSON.parse(localStorage.getItem('minesUsers') || '[]');
-      const userIndex = savedUsers.findIndex((u: any) => u.id === user.id);
-      if (userIndex !== -1) {
-        savedUsers[userIndex].balance = newBalance;
-        localStorage.setItem('minesUsers', JSON.stringify(savedUsers));
-      }
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateBalance }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateBalance }}>
       {children}
     </AuthContext.Provider>
   );
