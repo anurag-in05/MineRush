@@ -32,16 +32,11 @@ async function issueTokenPair(user) {
 
 router.post('/register', authRateLimiter, validateBody(registerSchema), async (req, res) => {
     const { username, password } = req.body;
+    const normalizedUsername = username.trim().toLowerCase();
 
     try {
-        const exists = await User.findOne({ username });
-
-        if (exists) {
-            return res.status(400).json({ error: 'Username already exists' });
-        }
-
         const passwordHash = await bcrypt.hash(password, env.bcryptSaltRounds);
-        const newUser = new User({ username, password: passwordHash });
+        const newUser = new User({ username: normalizedUsername, password: passwordHash });
         await newUser.save();
 
         const tokens = await issueTokenPair(newUser);
