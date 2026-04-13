@@ -22,12 +22,12 @@ const AuthForm: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const success = isLogin
+      const result = isLogin
         ? await login(username, password)
         : await register(username, password);
 
-      if (!success) {
-        showToast(isLogin ? 'Invalid username or password' : 'Username already exists', 'error');
+      if (!result.success) {
+        showToast(result.error || 'Authentication failed', 'error');
       } else {
         if (!isLogin) {
           showToast('Account created successfully!', 'success');
