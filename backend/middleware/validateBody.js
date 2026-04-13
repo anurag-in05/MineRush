@@ -3,8 +3,9 @@ function validateBody(schema) {
         const result = schema.safeParse(req.body);
 
         if (!result.success) {
+            const firstMessage = result.error.issues[0]?.message || 'Invalid request body';
             return res.status(400).json({
-                error: 'Invalid request body',
+                error: firstMessage,
                 details: result.error.issues.map((issue) => ({
                     path: issue.path.join('.') || 'body',
                     message: issue.message

@@ -60,8 +60,9 @@ router.post('/register', authRateLimiter, validateBody(registerSchema), async (r
             return res.status(400).json({ error: 'Username already exists' });
         }
 
-        if (err.message) {
-            return res.status(400).json({ error: err.message });
+        if (err.name === 'ValidationError') {
+            const firstMessage = Object.values(err.errors)[0]?.message || 'Validation failed';
+            return res.status(400).json({ error: firstMessage });
         }
 
         return res.status(500).json({ error: 'Registration failed' });
@@ -70,9 +71,10 @@ router.post('/register', authRateLimiter, validateBody(registerSchema), async (r
 
 router.post('/login', authRateLimiter, validateBody(loginSchema), async (req, res) => {
     const { username, password } = req.body;
+    const normalizedUsername = username.trim().toLowerCase();
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username: normalizedUsername });
 
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });

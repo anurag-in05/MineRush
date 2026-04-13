@@ -1,5 +1,5 @@
 // Centralized API utility for backend calls
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 export async function apiRequest(path: string, options: RequestInit = {}) {
   // Use the correct token from localStorage (minesToken)
