@@ -14,7 +14,8 @@ const env = {
     loginMaxAttempts: Number(process.env.LOGIN_MAX_ATTEMPTS) || 5,
     loginLockMs: Number(process.env.LOGIN_LOCK_MS) || 15 * 60 * 1000,
     authRateLimitWindowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-    authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 20
+    authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 20,
+    corsOrigin: process.env.CORS_ORIGIN || ''
 };
 
 if (!env.jwtSecret) {

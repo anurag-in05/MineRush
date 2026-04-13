@@ -9,7 +9,13 @@ const userRoutes = require('./routes/userRoutes');
 
 function createApp() {
     const app = express();
-    app.use(cors());
+
+    if (env.corsOrigin) {
+        app.use(cors({ origin: env.corsOrigin }));
+    } else {
+        app.use(cors());
+    }
+
     app.use(express.json());
     app.use(authRoutes);
     app.use(gameRoutes);
