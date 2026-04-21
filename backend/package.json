@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "dev": "tsx server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "test": "node --test tests/**/*.test.js"
   },
   "dependencies": {
@@ -15,7 +16,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.6.0",
     "mongodb-memory-server": "^11.0.1",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   }
 }
